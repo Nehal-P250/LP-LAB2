@@ -12,10 +12,11 @@ int yylex();
 [a-zA-Z]			                    {yylval.id = yytext[0]; return identifier;}
 
 [ \t\n]                                 ;
-[-+=;]           	                    {return yytext[0];}          
-.                                       {ECHO; yyerror ("unexpected character");}
+[-+=;!]           	                    {return yytext[0];}          
 [/][/][a-zA-Z0-9!@#$%^&*() \t\n]*[\n]   {return comment;}
-                                                     
+[&&]                                    {return aa;}  
+[||]                                    {return oo;}    
+.                                       {ECHO; yyerror ("unexpected character");}                                              
 
 %%
 int yywrap (void) {return 1;}

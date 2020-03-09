@@ -7,6 +7,8 @@ int yylex();
 float symbols[52];
 float symbolVal(char symbol);
 void updateSymbolVal(char symbol, float val);
+int notval(int a);
+int andval(int a , int b);
 %}
 
 %union {float num; char id;}         /* Yacc definitions */
@@ -14,6 +16,8 @@ void updateSymbolVal(char symbol, float val);
 %token print
 %token exit_command
 %token comment
+%token aa
+%token oo
 %token <num> number
 %token <id> identifier
 %type <num> line exp term 
@@ -38,6 +42,9 @@ assignment : identifier '=' exp  { updateSymbolVal($1,$3); }
 exp    	: term                  {$$ = $1;}
        	| exp '+' term          {$$ = $1 + $3;}
        	| exp '-' term          {$$ = $1 - $3;}
+		| '!' term				{$$ = notval($2);}
+		| exp aa term			{$$ = andval($1,$3);}
+		| exp oo term			{$$ = orval($1,$3);}
        	;
 term   	: number                {$$ = $1;}
 		| identifier			{$$ = symbolVal($1);} 
@@ -73,6 +80,32 @@ void updateSymbolVal(char symbol, float val)
 	int bucket = computeSymbolIndex(symbol);
 	symbols[bucket] = val;
 }
+
+int notval(int a){
+	if(a>0){
+		return 0;
+	}else{
+		return 1;
+	}
+}
+
+int andval(int a , int b){
+	if(a>0 && b>0){
+		return 1;
+	}else{
+		return 0;
+	}
+}
+
+int orval(int a , int b){
+	if(a==0 && b==0){
+		return 0;
+	}else{
+		return 1;
+	}
+}
+
+
 
 int main (void) {
 	/* init symbol table */
