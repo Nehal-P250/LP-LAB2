@@ -12,8 +12,12 @@ int yylex();
 [0-9]+|[0-9]*\.[0-9]+                   {yylval.num = atof(yytext); return number;}
 "print"				                    {return print;}
 "exit"				                    {return exit_command;}
+"ee"                                    {return eqeq;}
+"lte"                                   {return lesste;}
+"gte"                                   {return grette;}
+"lt"                                    {return lesst;}
+"gt"                                    {return grett;}
 [a-zA-Z]+[0-9]*			                {strcpy(yylval.id,yytext); return identifier;}
-
 [ \t\n]                                 ;
 [-+=;!()*/]           	                {return yytext[0];}          
 [/][/][a-zA-Z0-9!@#$%^&*() \t\n]*[\n]   {return comment;}
@@ -22,6 +26,13 @@ int yylex();
 .                                       {ECHO; yyerror ("unexpected character");}                                              
 
 %%
+
+
+// [==]                                    {return eqeq;}
+// [<=]                                    {return lesste;}
+// [>=]                                    {return grette;}
+// [<]                                     {return lesst;}
+// [>]                                     {return grette;}
 
 
 

@@ -48,30 +48,44 @@ extern int yydebug;
     print = 258,
     exit_command = 259,
     comment = 260,
-    aa = 261,
-    oo = 262,
-    number = 263,
-    identifier = 264
+    fi = 261,
+    fie = 262,
+    aa = 263,
+    oo = 264,
+    lesst = 265,
+    grett = 266,
+    lesste = 267,
+    grette = 268,
+    eqeq = 269,
+    number = 270,
+    identifier = 271
   };
 #endif
 /* Tokens.  */
 #define print 258
 #define exit_command 259
 #define comment 260
-#define aa 261
-#define oo 262
-#define number 263
-#define identifier 264
+#define fi 261
+#define fie 262
+#define aa 263
+#define oo 264
+#define lesst 265
+#define grett 266
+#define lesste 267
+#define grette 268
+#define eqeq 269
+#define number 270
+#define identifier 271
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 
 union YYSTYPE
 {
-#line 26 "calc.y" /* yacc.c:1909  */
+#line 31 "calc.y" /* yacc.c:1909  */
 float num; char id[10];
 
-#line 75 "y.tab.h" /* yacc.c:1909  */
+#line 89 "y.tab.h" /* yacc.c:1909  */
 };
 
 typedef union YYSTYPE YYSTYPE;

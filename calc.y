@@ -21,6 +21,11 @@ void newVar(char symbol[10],float value);
 int notval(int a);
 int orval(int a,int b);
 int andval(int a , int b);
+int lt(int a , int b);
+int gt(int a , int b);
+int et(int a , int b);
+int gte(int a , int b);
+int lte(int a , int b);
 %}
 
 %union {float num; char id[10];}         /* Yacc definitions */
@@ -28,11 +33,18 @@ int andval(int a , int b);
 %token print
 %token exit_command
 %token comment
+%token fi
+%token fie
 %token aa
 %token oo
+%token lesst
+%token grett
+%token lesste
+%token grette
+%token eqeq
 %token <num> number
 %token <id> identifier
-%type <num> line exp term exptwo expthree brac
+%type <num> line exp term exptwo expthree brac 
 %type <id> assignment
 
 %%
@@ -54,12 +66,17 @@ assignment : identifier '=' exp  { updateSymbolVal($1,$3); }
 
 
 
-exp 	: exp '+' exptwo        {$$ = $1 + $3;}
-       	| exp '-' exptwo        {$$ = $1 - $3;}
-		| exp aa exptwo			{$$ = andval($1,$3);}
-		| exp oo exptwo			{$$ = orval($1,$3);}
-		| '!' exptwo			{$$ = notval($2);}
-		| exptwo				{$$ = $1;}
+exp 	: exp '+' exptwo        	{$$ = $1 + $3;}
+       	| exp '-' exptwo        	{$$ = $1 - $3;}
+		| exp aa exptwo				{$$ = andval($1,$3);}
+		| exp oo exptwo				{$$ = orval($1,$3);}
+		| exp lesst exptwo        	{$$ = lt($1,$3);}     
+       	| exp grett exptwo        	{$$ = gt($1,$3);}     
+		| exp lesste exptwo			{$$ = lte($1,$3);}     
+		| exp grette exptwo			{$$ = gte($1,$3);}      
+		| exp eqeq exptwo			{$$ = et($1,$3);}  	
+		| '!' exptwo				{$$ = notval($2);}
+		| exptwo					{$$ = $1;}
 		;
 
 exptwo	: exptwo '*' expthree   {$$ = $1 * $3;}
@@ -96,6 +113,17 @@ term   	: number                {$$ = $1;}
 // 		| exp aa term			{$$ = andval($1,$3);}
 // 		| exp oo term			{$$ = orval($1,$3);}
 //        	;
+
+
+
+// relexp 	: relexp '<' exp        	{$$ = lt($1,$3);}     
+//        	| relexp '>' exp        	{$$ = gt($1,$3);}     
+// 		| relexp lesste exp			{$$ = et($1,$3);}     
+// 		| relexp grette exp			{$$ = gte($1,$3);}      
+// 		| relexp eqeq exp			{$$ = lte($1,$3);}      
+// 		| exp						{$$ = $1;}	
+// 		;
+
 
 
 
@@ -139,7 +167,7 @@ float symbolVal(char symbol[10])
 void updateSymbolVal(char symbol[10], float val)
 {
 	int bucket = computeSymbolIndex(symbol);
-	if(bucket =-1){
+	if(bucket ==-1){
 		//the variable does not exists so create new one
 		newVar(symbol,val);
 	}else{
@@ -170,6 +198,49 @@ int orval(int a , int b){
 		return 1;
 	}
 }
+
+
+int lt(int a , int b){
+	if(a < b){
+		return 1;
+	}else{
+		return 0;
+	}
+}
+
+int gt(int a , int b){
+	if(a > b){
+		return 1;
+	}else{
+		return 0;
+	}
+}
+
+int et(int a , int b){
+	if(a == b){
+		return 1;
+	}else{
+		return 0;
+	}
+}
+
+int lte(int a , int b){
+	if(a <= b){
+		return 1;
+	}else{
+		return 0;
+	}
+}
+
+int gte(int a , int b){
+	if(a >= b){
+		return 1;
+	}else{
+		return 0;
+	}
+}
+
+
 
 
 
