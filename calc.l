@@ -1,6 +1,9 @@
 %{
 #include <math.h>
+#include <string.h>
 #include "y.tab.h"
+
+int assign(char *s);
 void yyerror (char *s);
 int yylex();
 
@@ -9,7 +12,7 @@ int yylex();
 [0-9]+|[0-9]*\.[0-9]+                   {yylval.num = atof(yytext); return number;}
 "print"				                    {return print;}
 "exit"				                    {return exit_command;}
-[a-zA-Z]			                    {yylval.id = yytext[0]; return identifier;}
+[a-zA-Z]+[0-9]*			                {strcpy(yylval.id,yytext); return identifier;}
 
 [ \t\n]                                 ;
 [-+=;!]           	                    {return yytext[0];}          
@@ -19,5 +22,18 @@ int yylex();
 .                                       {ECHO; yyerror ("unexpected character");}                                              
 
 %%
-int yywrap (void) {return 1;}
 
+
+
+int yywrap (void) {return 1;}
+int assign(char *s){
+    if(strlen(s)>9){
+        ECHO ; yyerror("improper variable name");
+    }else{
+        int i=0;
+        for(i=0;i<strlen(s);i++){
+            yylval.id[i]=s[i];
+        }
+    }
+    return identifier;
+}

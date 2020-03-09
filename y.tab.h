@@ -49,8 +49,9 @@ extern int yydebug;
     exit_command = 259,
     comment = 260,
     aa = 261,
-    number = 262,
-    identifier = 263
+    oo = 262,
+    number = 263,
+    identifier = 264
   };
 #endif
 /* Tokens.  */
@@ -58,18 +59,19 @@ extern int yydebug;
 #define exit_command 259
 #define comment 260
 #define aa 261
-#define number 262
-#define identifier 263
+#define oo 262
+#define number 263
+#define identifier 264
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 
 union YYSTYPE
 {
-#line 14 "calc.y" /* yacc.c:1909  */
-float num; char id;
+#line 26 "calc.y" /* yacc.c:1909  */
+float num; char id[10];
 
-#line 73 "y.tab.h" /* yacc.c:1909  */
+#line 75 "y.tab.h" /* yacc.c:1909  */
 };
 
 typedef union YYSTYPE YYSTYPE;

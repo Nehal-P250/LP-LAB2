@@ -4,14 +4,26 @@ int yylex();
 #include <stdio.h>     /* C declarations used in actions */
 #include <stdlib.h>
 #include <ctype.h>
-float symbols[52];
-float symbolVal(char symbol);
-void updateSymbolVal(char symbol, float val);
+#include <string.h>
+
+typedef struct variabel{
+	char n[10];
+	float value;
+}variabel;
+
+variabel var[100];
+static int count=0;
+
+// float symbols[52];
+float symbolVal(char symbol[10]);
+void updateSymbolVal(char symbol[10], float val);
+void newVar(char symbol[10],float value);
 int notval(int a);
+int orval(int a,int b);
 int andval(int a , int b);
 %}
 
-%union {float num; char id;}         /* Yacc definitions */
+%union {float num; char id[10];}         /* Yacc definitions */
 %start line
 %token print
 %token exit_command
@@ -56,29 +68,49 @@ term   	: number                {$$ = $1;}
 
 %%                     /* C code */
 
-int computeSymbolIndex(char token)
+
+int computeSymbolIndex(char token[10])
 {
-	int idx = -1;
-	if(islower(token)) {
-		idx = token - 'a' + 26;
-	} else if(isupper(token)) {
-		idx = token - 'A';
+
+	int i=0;
+	int index=-1;
+	for(i =0;i<100;i++){
+		if(strcmp(token,var[i].n)==0){
+			index=i;
+			break;
+		}
 	}
-	return idx;
+	return index;
+
 } 
 
+// creates a new variabel 
+void newVar(char symbol[10],float value){
+	
+	count++;
+	strcpy(var[count].n,symbol);
+	var[count].value =value;
+
+}
+
+
 /* returns the value of a given symbol */
-float symbolVal(char symbol)
+float symbolVal(char symbol[10])
 {
 	int bucket = computeSymbolIndex(symbol);
-	return symbols[bucket];
+	return var[bucket].value;
 }
 
 /* updates the value of a given symbol */
-void updateSymbolVal(char symbol, float val)
+void updateSymbolVal(char symbol[10], float val)
 {
 	int bucket = computeSymbolIndex(symbol);
-	symbols[bucket] = val;
+	if(bucket =-1){
+		//the variable does not exists so create new one
+		newVar(symbol,val);
+	}else{
+		var[bucket].value = val;
+	}
 }
 
 int notval(int a){
@@ -110,8 +142,12 @@ int orval(int a , int b){
 int main (void) {
 	/* init symbol table */
 	int i;
-	for(i=0; i<52; i++) {
-		symbols[i] = 0;
+	for(i=0; i<100; i++) {
+		var[i].value = 0;
+		int k=0;
+		for (int k=0;k<10;k++){
+			var[i].n[k]='\0';
+		}
 	}
 
 	return yyparse ( );
