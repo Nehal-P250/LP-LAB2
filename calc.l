@@ -15,7 +15,7 @@ int yylex();
 [a-zA-Z]+[0-9]*			                {strcpy(yylval.id,yytext); return identifier;}
 
 [ \t\n]                                 ;
-[-+=;!]           	                    {return yytext[0];}          
+[-+=;!()*/]           	                {return yytext[0];}          
 [/][/][a-zA-Z0-9!@#$%^&*() \t\n]*[\n]   {return comment;}
 [&&]                                    {return aa;}  
 [||]                                    {return oo;}    
@@ -37,3 +37,4 @@ int assign(char *s){
     }
     return identifier;
 }
+

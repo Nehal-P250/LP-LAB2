@@ -32,7 +32,7 @@ int andval(int a , int b);
 %token oo
 %token <num> number
 %token <id> identifier
-%type <num> line exp term 
+%type <num> line exp term exptwo expthree brac
 %type <id> assignment
 
 %%
@@ -50,14 +50,32 @@ line    : assignment ';'		{;}
         ;
 
 assignment : identifier '=' exp  { updateSymbolVal($1,$3); }
-			;
-exp    	: term                  {$$ = $1;}
-       	| exp '+' term          {$$ = $1 + $3;}
-       	| exp '-' term          {$$ = $1 - $3;}
-		| '!' term				{$$ = notval($2);}
-		| exp aa term			{$$ = andval($1,$3);}
-		| exp oo term			{$$ = orval($1,$3);}
-       	;
+		   ;
+
+
+
+exp 	: exp '+' exptwo        {$$ = $1 + $3;}
+       	| exp '-' exptwo        {$$ = $1 - $3;}
+		| exp aa exptwo			{$$ = andval($1,$3);}
+		| exp oo exptwo			{$$ = orval($1,$3);}
+		| '!' exptwo			{$$ = notval($2);}
+		| exptwo				{$$ = $1;}
+		;
+
+exptwo	: exptwo '*' expthree   {$$ = $1 * $3;}
+		| expthree				{$$ = $1;}
+		;
+
+expthree : expthree '/' brac	{$$ = $1 / $3;}
+		 | brac					{$$ = $1;}
+		 ;
+
+brac	 : '(' exp ')'			{$$ = $2;}
+		 | term					{$$ = $1;}
+		 ;
+
+
+
 term   	: number                {$$ = $1;}
 		| identifier			{$$ = symbolVal($1);} 
         ;
@@ -67,6 +85,22 @@ term   	: number                {$$ = $1;}
 
 
 %%                     /* C code */
+
+
+// + and - are left associative
+
+// exp    	: term                  {$$ = $1;}
+//        	| exp '+' term          {$$ = $1 + $3;}
+//        	| exp '-' term          {$$ = $1 - $3;}
+// 		| '!' term				{$$ = notval($2);}
+// 		| exp aa term			{$$ = andval($1,$3);}
+// 		| exp oo term			{$$ = orval($1,$3);}
+//        	;
+
+
+
+
+
 
 
 int computeSymbolIndex(char token[10])
