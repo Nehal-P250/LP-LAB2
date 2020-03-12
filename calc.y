@@ -14,6 +14,19 @@ typedef struct variabel{
 variabel var[100];
 static int count=0;
 
+// if one of the block in the if {} else 
+// or if { } else if(){ } ..gets evaluated sucessufully then the 
+// rest should not get evaluated . if_done = 1 means that one of the 
+// above if or else if statement is evaluated and hence we should not 
+// evaluate current block; 
+//finally on end if else blocks if_done  will be reset to 0
+int if_done = 0;
+
+// if 1 then we can evaluate eles we can't
+int eval =1;
+
+
+
 // float symbols[52];
 float symbolVal(char symbol[10]);
 void updateSymbolVal(char symbol[10], float val);
@@ -21,11 +34,13 @@ void newVar(char symbol[10],float value);
 int notval(int a);
 int orval(int a,int b);
 int andval(int a , int b);
+float modval(float a , float b);
 int lt(int a , int b);
 int gt(int a , int b);
 int et(int a , int b);
 int gte(int a , int b);
 int lte(int a , int b);
+
 %}
 
 %union {float num; char id[10];}         /* Yacc definitions */
@@ -33,8 +48,12 @@ int lte(int a , int b);
 %token print
 %token exit_command
 %token comment
-%token fi
-%token fie
+%token mif
+%token melse
+%token mendif
+%token melseif
+%token increment
+%token decrement
 %token aa
 %token oo
 %token lesst
@@ -51,51 +70,121 @@ int lte(int a , int b);
 
 /* descriptions of expected inputs     corresponding actions (in C) */
 
-line    : assignment ';'		{;}
-		| exit_command ';'		{exit(EXIT_SUCCESS);}
-		| print exp ';'			{printf("Printing %.2f\n", $2);}
-		| line assignment ';'	{;}
-		| line print exp ';'	{printf("Printing %.2f\n", $3);}
-		| line exit_command ';'	{exit(EXIT_SUCCESS);}
-		| comment				{;}
-		| line comment			{;}
+line    : assignment ';'				{;}
+		| exit_command ';'				{if(eval) exit(EXIT_SUCCESS);}
+		| print exp ';'					{if(eval) printf("Printing %.2f\n", $2);}
+		| line assignment ';'			{;}
+		| line print exp ';'			{if(eval) printf("Printing %.2f\n", $3);}
+		| line exit_command ';'			{if(eval) exit(EXIT_SUCCESS);}
+		| comment						{;}
+		| line comment					{;}
+		| ifgrammar line '}'			{eval=1;}
+		| elsegrammar line '}'  		{eval=1;}
+		| mendif ';'					{if_done=0;}
+		| line ifgrammar line '}'		{eval=1;}
+		| line elsegrammar line '}'  	{eval=1;}
+		| line mendif ';'				{if_done=0;}
+		| elseifgrammar line '}'		{eval=1;}
+		| line elseifgrammar line '}'	{eval=1;}
         ;
 
-assignment : identifier '=' exp  { updateSymbolVal($1,$3); }
-		   ;
+assignment : identifier '=' exp  {if(eval) updateSymbolVal($1,$3); }
+		   | identifier '+''=' exp  {if(eval) updateSymbolVal($1,symbolVal($1) + $4); }
+		   | identifier '-''=' exp  {if(eval) updateSymbolVal($1,symbolVal($1) - $4); }
+		   | identifier '/''=' exp  {if(eval) updateSymbolVal($1,symbolVal($1) / $4); }
+		   | identifier '*''=' exp  {if(eval) updateSymbolVal($1,symbolVal($1) * $4); }
+		
+		  ;
 
 
 
-exp 	: exp '+' exptwo        	{$$ = $1 + $3;}
-       	| exp '-' exptwo        	{$$ = $1 - $3;}
-		| exp aa exptwo				{$$ = andval($1,$3);}
-		| exp oo exptwo				{$$ = orval($1,$3);}
-		| exp lesst exptwo        	{$$ = lt($1,$3);}     
-       	| exp grett exptwo        	{$$ = gt($1,$3);}     
-		| exp lesste exptwo			{$$ = lte($1,$3);}     
-		| exp grette exptwo			{$$ = gte($1,$3);}      
-		| exp eqeq exptwo			{$$ = et($1,$3);}  	
-		| '!' exptwo				{$$ = notval($2);}
-		| exptwo					{$$ = $1;}
+ifgrammar	: mif exp '{'  	{ 	
+								if($2){
+									if_done=1;
+									eval =1;
+								}else{
+									eval=0;
+									if_done=0;
+								}
+								
+							}
+
+			;
+			
+
+elsegrammar	: melse '{'  	{ 	
+									if(if_done==0){
+										eval=1;
+									}else{
+										eval=0;
+									}
+								
+								}
+			;
+			
+
+elseifgrammar	: melseif exp '{'  	{ 
+											
+										if(if_done==0){
+											if($2){
+												if_done=1;
+												eval=1;
+											}else{
+												eval=1;
+											}
+										}else{
+											eval=0;
+										}
+								
+									}
+			;
+			
+
+
+
+
+
+
+
+
+
+exp 	: exp '+' exptwo        	{ if(eval) $$ = $1 + $3;}
+       	| exp '-' exptwo        	{ if(eval) $$ = $1 - $3;}
+		| exp '%' exptwo        	{ if(eval) $$ = modval($1,$3);}   
+		| exp aa exptwo				{ if(eval) $$ = andval($1,$3);}
+		| exp oo exptwo				{ if(eval) $$ = orval($1,$3);}
+		| exp lesst exptwo        	{ if(eval) $$ = lt($1,$3);}     
+       	| exp grett exptwo        	{ if(eval) $$ = gt($1,$3);}     
+		| exp lesste exptwo			{ if(eval) $$ = lte($1,$3);}     
+		| exp grette exptwo			{ if(eval) $$ = gte($1,$3);}      
+		| exp eqeq exptwo			{ if(eval) $$ = et($1,$3);}  	
+		| '!' exptwo				{ if(eval) $$ = notval($2);}
+		| exptwo					{ if(eval) $$ = $1;}
 		;
 
-exptwo	: exptwo '*' expthree   {$$ = $1 * $3;}
-		| expthree				{$$ = $1;}
+exptwo	: exptwo '*' expthree   { if(eval) $$ = $1 * $3;}
+		| expthree				{ if(eval) $$ = $1;}
 		;
 
-expthree : expthree '/' brac	{$$ = $1 / $3;}
-		 | brac					{$$ = $1;}
+expthree : expthree '/' brac	{ if(eval) $$ = $1 / $3;}
+		 | brac					{ if(eval) $$ = $1;}
 		 ;
 
-brac	 : '(' exp ')'			{$$ = $2;}
-		 | term					{$$ = $1;}
+brac	 : '(' exp ')'			{ if(eval) $$ = $2;}
+		 | term					{ if(eval) $$ = $1;}
 		 ;
 
 
 
-term   	: number                {$$ = $1;}
-		| identifier			{$$ = symbolVal($1);} 
+term   	: number                { if(eval) $$ = $1;}
+		| identifier			{ if(eval) $$ = symbolVal($1);} 
+		| identifier increment		{if(eval==1){$$ = symbolVal($1); updateSymbolVal($1,symbolVal($1)+1);}}
+		| identifier decrement		{if(eval==1){$$ = symbolVal($1); updateSymbolVal($1,symbolVal($1)-1);}}
+		| increment identifier 		{if(eval==1){updateSymbolVal($2,symbolVal($2)+1); $$ = symbolVal($2);}}
+		| decrement identifier 		{if(eval==1){updateSymbolVal($2,symbolVal($2)-1); $$ = symbolVal($2);}}
         ;
+        ;
+
 
 
 
@@ -240,6 +329,19 @@ int gte(int a , int b){
 	}
 }
 
+
+float modval(float a , float b){
+	
+	float ans;
+	if(b>0){
+		ans = a - (b*((int)(a/b)));
+		return ans;
+	}else{
+		printf("Divide BY Zero \n");
+	}
+	return -1;
+
+}
 
 
 

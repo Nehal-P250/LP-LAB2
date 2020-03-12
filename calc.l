@@ -10,19 +10,26 @@ int yylex();
 %}
 %%
 [0-9]+|[0-9]*\.[0-9]+                   {yylval.num = atof(yytext); return number;}
+
 "print"				                    {return print;}
+"if"				                    {return mif;}
+"else"				                    {return melse;}
+"elseif"				                {return melseif;}
+"endif"				                    {return mendif;}
 "exit"				                    {return exit_command;}
-"ee"                                    {return eqeq;}
-"lte"                                   {return lesste;}
-"gte"                                   {return grette;}
-"lt"                                    {return lesst;}
-"gt"                                    {return grett;}
+"=="                                    {return eqeq;}
+"<="                                   {return lesste;}
+">="                                   {return grette;}
+"<"                                    {return lesst;}
+">"                                    {return grett;}
+"++"                                   {return increment;}
+"--"                                   {return decrement;}
 [a-zA-Z]+[0-9]*			                {strcpy(yylval.id,yytext); return identifier;}
 [ \t\n]                                 ;
-[-+=;!()*/]           	                {return yytext[0];}          
+[-+%=;!()*/{}]           	                {return yytext[0];}          
 [/][/][a-zA-Z0-9!@#$%^&*() \t\n]*[\n]   {return comment;}
-[&&]                                    {return aa;}  
-[||]                                    {return oo;}    
+"&&"                                  {return aa;}  
+"||"                                    {return oo;}    
 .                                       {ECHO; yyerror ("unexpected character");}                                              
 
 %%

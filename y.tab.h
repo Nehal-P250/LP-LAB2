@@ -48,44 +48,52 @@ extern int yydebug;
     print = 258,
     exit_command = 259,
     comment = 260,
-    fi = 261,
-    fie = 262,
-    aa = 263,
-    oo = 264,
-    lesst = 265,
-    grett = 266,
-    lesste = 267,
-    grette = 268,
-    eqeq = 269,
-    number = 270,
-    identifier = 271
+    mif = 261,
+    melse = 262,
+    mendif = 263,
+    melseif = 264,
+    increment = 265,
+    decrement = 266,
+    aa = 267,
+    oo = 268,
+    lesst = 269,
+    grett = 270,
+    lesste = 271,
+    grette = 272,
+    eqeq = 273,
+    number = 274,
+    identifier = 275
   };
 #endif
 /* Tokens.  */
 #define print 258
 #define exit_command 259
 #define comment 260
-#define fi 261
-#define fie 262
-#define aa 263
-#define oo 264
-#define lesst 265
-#define grett 266
-#define lesste 267
-#define grette 268
-#define eqeq 269
-#define number 270
-#define identifier 271
+#define mif 261
+#define melse 262
+#define mendif 263
+#define melseif 264
+#define increment 265
+#define decrement 266
+#define aa 267
+#define oo 268
+#define lesst 269
+#define grett 270
+#define lesste 271
+#define grette 272
+#define eqeq 273
+#define number 274
+#define identifier 275
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 
 union YYSTYPE
 {
-#line 31 "calc.y" /* yacc.c:1909  */
+#line 46 "calc.y" /* yacc.c:1909  */
 float num; char id[10];
 
-#line 89 "y.tab.h" /* yacc.c:1909  */
+#line 97 "y.tab.h" /* yacc.c:1909  */
 };
 
 typedef union YYSTYPE YYSTYPE;

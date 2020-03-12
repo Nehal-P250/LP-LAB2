@@ -1,4 +1,5 @@
-yacc-tutorial
-=============
+Language processing  lab Eval 2 
 
-This is the source code for my Yacc/Bison screencast tutorial on [YouTube](https://youtu.be/__-wUHG2rfM). 
+ROLL NO. -> BT17CSE047 , BT17CSE035
+
+->Simple interpreter using lex and yacc.
