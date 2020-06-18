@@ -14,22 +14,12 @@ int yylex();
 "print"				                    {return print;}
 "if"				                    {return mif;}
 "else"				                    {return melse;}
-"elseif"				                {return melseif;}
-"endif"				                    {return mendif;}
+"while"                                 {return mwhile;}
 "exit"				                    {return exit_command;}
-"=="                                    {return eqeq;}
-"<="                                   {return lesste;}
-">="                                   {return grette;}
-"<"                                    {return lesst;}
-">"                                    {return grett;}
-"++"                                   {return increment;}
-"--"                                   {return decrement;}
 [a-zA-Z]+[0-9]*			                {strcpy(yylval.id,yytext); return identifier;}
 [ \t\n]                                 ;
-[-+%=;!()*/{}]           	                {return yytext[0];}          
-[/][/][a-zA-Z0-9!@#$%^&*() \t\n]*[\n]   {return comment;}
-"&&"                                  {return aa;}  
-"||"                                    {return oo;}    
+[-+%=;!()*/{}]           	            {return yytext[0];}          
+[/][/][a-zA-Z0-9!@#$%^&*() \t\n]*[\n]   {return comment;}  
 .                                       {ECHO; yyerror ("unexpected character");}                                              
 
 %%

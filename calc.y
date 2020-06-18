@@ -14,18 +14,6 @@ typedef struct variabel{
 variabel var[100];
 static int count=0;
 
-// if one of the block in the if {} else 
-// or if { } else if(){ } ..gets evaluated sucessufully then the 
-// rest should not get evaluated . if_done = 1 means that one of the 
-// above if or else if statement is evaluated and hence we should not 
-// evaluate current block; 
-//finally on end if else blocks if_done  will be reset to 0
-int if_done = 0;
-
-// if 1 then we can evaluate eles we can't
-int eval =1;
-
-
 
 // float symbols[52];
 float symbolVal(char symbol[10]);
@@ -50,17 +38,7 @@ int lte(int a , int b);
 %token comment
 %token mif
 %token melse
-%token mendif
-%token melseif
-%token increment
-%token decrement
-%token aa
-%token oo
-%token lesst
-%token grett
-%token lesste
-%token grette
-%token eqeq
+%token mwhile
 %token <num> number
 %token <id> identifier
 %type <num> line exp term exptwo expthree brac 
@@ -78,111 +56,62 @@ line    : assignment ';'				{;}
 		| line exit_command ';'			{if(eval) exit(EXIT_SUCCESS);}
 		| comment						{;}
 		| line comment					{;}
-		| ifgrammar line '}'			{eval=1;}
-		| elsegrammar line '}'  		{eval=1;}
-		| mendif ';'					{if_done=0;}
-		| line ifgrammar line '}'		{eval=1;}
-		| line elsegrammar line '}'  	{eval=1;}
-		| line mendif ';'				{if_done=0;}
-		| elseifgrammar line '}'		{eval=1;}
-		| line elseifgrammar line '}'	{eval=1;}
+		| mif line '}'					{eval=1;}
+		| melse line '}'  				{eval=1;}
+		| line mif line '}'				{eval=1;}
+		| line melse line '}'  			{eval=1;}
         ;
 
 assignment : identifier '=' exp  {if(eval) updateSymbolVal($1,$3); }
-		   | identifier '+''=' exp  {if(eval) updateSymbolVal($1,symbolVal($1) + $4); }
-		   | identifier '-''=' exp  {if(eval) updateSymbolVal($1,symbolVal($1) - $4); }
-		   | identifier '/''=' exp  {if(eval) updateSymbolVal($1,symbolVal($1) / $4); }
-		   | identifier '*''=' exp  {if(eval) updateSymbolVal($1,symbolVal($1) * $4); }
+		   | identifier '+''=' exp  {updateSymbolVal($1,symbolVal($1) + $4); }
+		   | identifier '-''=' exp  {updateSymbolVal($1,symbolVal($1) - $4); }
+		   | identifier '/''=' exp  {updateSymbolVal($1,symbolVal($1) / $4); }
+		   | identifier '*''=' exp  {updateSymbolVal($1,symbolVal($1) * $4); }
 		
 		  ;
 
-
-
-ifgrammar	: mif exp '{'  	{ 	
-								if($2){
-									if_done=1;
-									eval =1;
-								}else{
-									eval=0;
-									if_done=0;
-								}
-								
-							}
-
-			;
-			
-
-elsegrammar	: melse '{'  	{ 	
-									if(if_done==0){
-										eval=1;
-									}else{
-										eval=0;
-									}
-								
-								}
-			;
-			
-
-elseifgrammar	: melseif exp '{'  	{ 
-											
-										if(if_done==0){
-											if($2){
-												if_done=1;
-												eval=1;
-											}else{
-												eval=1;
-											}
-										}else{
-											eval=0;
-										}
-								
-									}
-			;
-			
+condition    	:
+				| term '<' term        	{$$ = lt($1,$3);}     
+       			| term '>' term        	{$$ = gt($1,$3);}     
+				| term '<' '=' term		{$$ = lte($1,$3);}     
+				| term '>' '=' term		{$$ = gte($1,$3);}      
+				| term '=' '=' term		{$$ = et($1,$3);}
+        		;
 
 
 
 
 
-
-
-
-
-exp 	: exp '+' exptwo        	{ if(eval) $$ = $1 + $3;}
-       	| exp '-' exptwo        	{ if(eval) $$ = $1 - $3;}
-		| exp '%' exptwo        	{ if(eval) $$ = modval($1,$3);}   
-		| exp aa exptwo				{ if(eval) $$ = andval($1,$3);}
-		| exp oo exptwo				{ if(eval) $$ = orval($1,$3);}
-		| exp lesst exptwo        	{ if(eval) $$ = lt($1,$3);}     
-       	| exp grett exptwo        	{ if(eval) $$ = gt($1,$3);}     
-		| exp lesste exptwo			{ if(eval) $$ = lte($1,$3);}     
-		| exp grette exptwo			{ if(eval) $$ = gte($1,$3);}      
-		| exp eqeq exptwo			{ if(eval) $$ = et($1,$3);}  	
-		| '!' exptwo				{ if(eval) $$ = notval($2);}
-		| exptwo					{ if(eval) $$ = $1;}
+exp 	: exp '+' exptwo        	{$$ = $1 + $3;}
+       	| exp '-' exptwo        	{$$ = $1 - $3;}
+		| exp '%' exptwo        	{$$ = modval($1,$3);}   
+		| exp '&' '&' exptwo		{$$ = andval($1,$3);}
+		| exp '|' '|' exptwo		{$$ = orval($1,$3);}
+		| exp '<' exptwo        	{$$ = lt($1,$3);}     
+       	| exp '>' exptwo        	{$$ = gt($1,$3);}     
+		| exp '<' '=' exptwo		{$$ = lte($1,$3);}     
+		| exp '>' '=' exptwo		{$$ = gte($1,$3);}      
+		| exp '=' '=' exptwo		{$$ = et($1,$3);}  	
+		| '!' exptwo				{$$ = notval($2);}
+		| exptwo					{$$ = $1;}
 		;
 
-exptwo	: exptwo '*' expthree   { if(eval) $$ = $1 * $3;}
-		| expthree				{ if(eval) $$ = $1;}
+exptwo	: exptwo '*' expthree   {$$ = $1 * $3;}
+		| expthree				{$$ = $1;}
 		;
 
-expthree : expthree '/' brac	{ if(eval) $$ = $1 / $3;}
-		 | brac					{ if(eval) $$ = $1;}
+expthree : expthree '/' brac	{$$ = $1 / $3;}
+		 | brac					{$$ = $1;}
 		 ;
 
-brac	 : '(' exp ')'			{ if(eval) $$ = $2;}
-		 | term					{ if(eval) $$ = $1;}
+brac	 : '(' exp ')'			{$$ = $2;}
+		 | term					{$$ = $1;}
 		 ;
 
 
 
-term   	: number                { if(eval) $$ = $1;}
-		| identifier			{ if(eval) $$ = symbolVal($1);} 
-		| identifier increment		{if(eval==1){$$ = symbolVal($1); updateSymbolVal($1,symbolVal($1)+1);}}
-		| identifier decrement		{if(eval==1){$$ = symbolVal($1); updateSymbolVal($1,symbolVal($1)-1);}}
-		| increment identifier 		{if(eval==1){updateSymbolVal($2,symbolVal($2)+1); $$ = symbolVal($2);}}
-		| decrement identifier 		{if(eval==1){updateSymbolVal($2,symbolVal($2)-1); $$ = symbolVal($2);}}
-        ;
+term   	: number		           {$$ = $1;}
+		| identifier				{$$ = symbolVal($1);} 
         ;
 
 
@@ -190,32 +119,8 @@ term   	: number                { if(eval) $$ = $1;}
 
 
 
-%%                     /* C code */
-
-
-// + and - are left associative
-
-// exp    	: term                  {$$ = $1;}
-//        	| exp '+' term          {$$ = $1 + $3;}
-//        	| exp '-' term          {$$ = $1 - $3;}
-// 		| '!' term				{$$ = notval($2);}
-// 		| exp aa term			{$$ = andval($1,$3);}
-// 		| exp oo term			{$$ = orval($1,$3);}
-//        	;
-
-
-
-// relexp 	: relexp '<' exp        	{$$ = lt($1,$3);}     
-//        	| relexp '>' exp        	{$$ = gt($1,$3);}     
-// 		| relexp lesste exp			{$$ = et($1,$3);}     
-// 		| relexp grette exp			{$$ = gte($1,$3);}      
-// 		| relexp eqeq exp			{$$ = lte($1,$3);}      
-// 		| exp						{$$ = $1;}	
-// 		;
-
-
-
-
+%%                    
+#include<ctype.h>
 
 
 
@@ -264,84 +169,45 @@ void updateSymbolVal(char symbol[10], float val)
 	}
 }
 
-int notval(int a){
-	if(a>0){
-		return 0;
-	}else{
-		return 1;
-	}
+
+
+
+
+char st[100][10];
+
+//top pointer for the expresion stack
+int top=0;
+// t will be for generating temprory variable that will be "t"+string(t);
+int t=0;
+push()
+{
+	strcpy(st_exp[++top],yytext);
 }
-
-int andval(int a , int b){
-	if(a>0 && b>0){
-		return 1;
-	}else{
-		return 0;
-	}
+codegen()
+{
+	strcpy(temp,"t");
+	strcat(temp,i_);
+	printf("%s = %s %s %s\n",temp,st_exp[top-2],st_exp[top-1],st_exp[top]);
+	top-=2;
+	strcpy(st_exp[top],temp);
+	i_[0]++;
 }
-
-int orval(int a , int b){
-	if(a==0 && b==0){
-		return 0;
-	}else{
-		return 1;
-	}
+codegen_umin()
+{
+	strcpy(temp,"t");
+	strcat(temp,i_);
+	printf("%s = -%s\n",temp,st_exp[top]);
+	top--;
+	strcpy(st_exp[top],temp);
+	i_[0]++;
 }
-
-
-int lt(int a , int b){
-	if(a < b){
-		return 1;
-	}else{
-		return 0;
-	}
-}
-
-int gt(int a , int b){
-	if(a > b){
-		return 1;
-	}else{
-		return 0;
-	}
-}
-
-int et(int a , int b){
-	if(a == b){
-		return 1;
-	}else{
-		return 0;
-	}
-}
-
-int lte(int a , int b){
-	if(a <= b){
-		return 1;
-	}else{
-		return 0;
-	}
-}
-
-int gte(int a , int b){
-	if(a >= b){
-		return 1;
-	}else{
-		return 0;
-	}
+codegen_assign()
+{
+	printf("%s = %s\n",st_exp[top-2],st_exp[top]);
+	top-=2;
 }
 
 
-float modval(float a , float b){
-	
-	float ans;
-	if(b>0){
-		ans = a - (b*((int)(a/b)));
-		return ans;
-	}else{
-		printf("Divide BY Zero \n");
-	}
-	return -1;
-
-}
 
 
 
@@ -361,4 +227,11 @@ int main (void) {
 }
 
 void yyerror (char *s) {fprintf (stderr, "%s\n", s);} 
+
+
+
+
+
+
+
 
